@@ -9,6 +9,7 @@ class Products(models.Model):
     product_image = models.ImageField(upload_to='photes/products')
     product_desc = models.TextField(max_length=500,blank=True)
     product_price = models.IntegerField()
+    product_old_price = models.IntegerField(blank=True)
     product_stock = models.IntegerField()
     is_available = models.BooleanField(default=False)
     category = models.ForeignKey(Category,on_delete=models.CASCADE)
