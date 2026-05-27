@@ -2,7 +2,7 @@
 
 ## About The Project
 
-This is an eCommerce web application built using Python and Django.
+Nidavellir is an Advance Ecommerce web application built using Python and Django.
 
 
 
