@@ -9,7 +9,7 @@ Nidavellir is an Advance Ecommerce web application built using Python and Django
 Current implemented features:
 
 - Custom User Authentication
-- User Registration and Login
+- Forgot Password & SMTP Email Verification
 - Product Categories
 - Product Listing
 - Product Details Page
