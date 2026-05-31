@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect,get_object_or_404
 from store.models import *
 from .models import *
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 def _cart_id(request):
@@ -11,7 +12,7 @@ def _cart_id(request):
     return cart
 
 
-def cart(request,total=0,quantity=0,cart_item=None):
+def cart(request,total=0,quantity=0,total_after_tax=0 ,cart_item=None):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_item = CartItem.objects.filter(cart=cart,is_active=True)
@@ -19,17 +20,19 @@ def cart(request,total=0,quantity=0,cart_item=None):
         for item in cart_item:
             total += (item.quantity * item.product.product_price)
             quantity += item.quantity
+        total_after_tax =  total + 10
+        
     except ObjectDoesNotExist:
         pass
     context = {
         'total':total,
         'quantity':quantity,
         'cart_item':cart_item,
-        
+        'total_after_tax':total_after_tax,
     }
     return render(request,'store/cart.html',context)
 
-
+@login_required(login_url='login_account')
 def add_to_cart(request,product_id):
     product = Products.objects.get(id=product_id)
 
@@ -89,5 +92,22 @@ def count_decrease(request,product_id):
     except ObjectDoesNotExist:
         pass
 
+@login_required(login_url='login_account')
+def checkout(request,total=0,quantity=0,cart_item=None):
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart,is_active=True)
 
+        for item in cart_items:
+            total += (item.quantity * item.product.product_price)
+            quantity += item.quantity
+    except ObjectDoesNotExist:
+        pass
+    context = {
+        'total':total,
+        'quantity':quantity,
+        'cart_items':cart_items,
+        
+    }
+    return render(request,'store/checkout.html',context)
     

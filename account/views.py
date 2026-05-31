@@ -3,6 +3,9 @@ from .forms import RegistrationForm
 from .models import *
 from django.contrib import messages,auth
 from django.contrib.auth.decorators import login_required
+from cart.models import Cart,CartItem
+from django.core.exceptions import ObjectDoesNotExist
+from cart.views import _cart_id
 
 # Verification email
 from django.contrib.sites.shortcuts import get_current_site
@@ -105,10 +108,6 @@ def activate(request, uidb64, token):
         return redirect('register_account')
     
 
-
-def dashboard(request):
-    return render(request,'accounts/dashboard.html')
-
 def ForgotPassword(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -170,3 +169,26 @@ def ResetPassword(request):
             return redirect('resetpassword')
     else:
         return render(request,'accounts/resetpassword.html')
+    
+
+def dashboard(request,user_id):
+    try:
+        get_user = Account.objects.get(id=user_id)
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cartitem = CartItem.objects.get(cart=cart)
+
+        username = get_user.username
+        email = get_user.email
+        phone_number = get_user.phone_number
+    
+    except ObjectDoesNotExist:
+        return redirect('home')
+
+    items = {
+        'cartitem':cartitem,
+        'username':username,
+        'email':email,
+        'phone_number':phone_number,
+        }
+
+    return render(request,'accounts/dashboard.html',items)
