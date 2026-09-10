@@ -18,17 +18,11 @@ Current implemented features:
 - Product Details Page
 - Shopping Cart
 - Quantity Increment / Decrement
-
-Upcoming features:
-
 - Order Management
 - Payment Integration
 - Product Reviews and Ratings
 - Order History
 - Invoice Generation
-- AWS Deployment
-
-This project is currently under development and new features are being added.
 
 ---
 
@@ -39,7 +33,7 @@ This project is currently under development and new features are being added.
 - HTML
 - CSS
 - Bootstrap
-- SQLite (or MongoDB/MySQL if using)
+- Postgresql
 
 ---
 

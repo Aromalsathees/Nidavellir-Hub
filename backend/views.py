@@ -1,33 +1,16 @@
-from django.shortcuts import render,redirect  
-from store.models import * 
-from cart.models import *
+from django.shortcuts import render
+from store.models import Product, ReviewRating
 
 def home(request):
-    try:
-        products = Products.objects.all().filter(is_available=True)
-    except Products.DoesNotExist:
-        return redirect('/')
-        
-    context = {
-        'products':products,
-    }
-    return render(request,'home.html',context)
+    products = Product.objects.all().filter(is_available=True).order_by('created_date')
 
-def product_detail(request,slug):
-    product = Products.objects.get(slug=slug)
-    context = {
-        'product':product
-    }
-    return render(request,'product_detail/product_detail.html',context)
+    # Get the reviews
+    reviews = None
+    for product in products:
+        reviews = ReviewRating.objects.filter(product_id=product.id, status=True)
 
-def search_product(request):
-    q = request.GET.get('q')
-    if not q:
-        return redirect('/')
-    product = Products.objects.filter(product_name__icontains=q)
-    product_count = product.count()
     context = {
-        'product':product,
-        'product_count':product_count
+        'products': products,
+        'reviews': reviews,
     }
-    return render(request,'search/search.html',context)
+    return render(request, 'home.html', context)
