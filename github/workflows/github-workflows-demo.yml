@@ -1,0 +1,163 @@
+name: Django Docker CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+
+      - name: Create PostgreSQL environment
+        run: |
+          cat <<EOF > backend/.env.production
+          POSTGRES_DB=advanced_ecom
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=postgres
+          EOF
+
+
+      - name: Create Django environment
+        run: |
+          cat <<EOF > backend/.env.docker
+          DEBUG=True
+          SECRET_KEY=django-insecure-ci-key
+          POSTGRES_DB=advanced_ecom
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=postgres
+          POSTGRES_HOST=db
+          POSTGRES_PORT=5432
+          EOF
+
+
+      - name: Build Docker containers
+        run: docker compose build
+
+
+      - name: Start containers
+        run: docker compose up -d
+
+
+      - name: Check containers
+        run: docker compose ps
+
+
+      - name: Django Check
+        run: docker compose exec -T backendd python manage.py check
+
+
+      - name: Check migrations
+        run: docker compose exec -T backendd python manage.py makemigrations --check
+
+
+      - name: Run migrations
+        run: docker compose exec -T backendd python manage.py migrate
+
+
+      - name: Run tests
+        run: docker compose exec -T backendd python manage.py test
+
+
+      - name: Show logs if failed
+        if: failure()
+        run: docker compose logs
+
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -vname: Django Docker CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+
+      - name: Create PostgreSQL environment
+        run: |
+          cat <<EOF > backend/.env.production
+          POSTGRES_DB=advanced_ecom
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=postgres
+          EOF
+
+
+      - name: Create Django environment
+        run: |
+          cat <<EOF > backend/.env.docker
+          DEBUG=True
+          SECRET_KEY=django-insecure-ci-key
+          POSTGRES_DB=advanced_ecom
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=postgres
+          POSTGRES_HOST=db
+          POSTGRES_PORT=5432
+          EOF
+
+
+      - name: Build Docker containers
+        run: docker compose build
+
+
+      - name: Start containers
+        run: docker compose up -d
+
+
+      - name: Check containers
+        run: docker compose ps
+
+
+      - name: Django Check
+        run: docker compose exec -T backendd python manage.py check
+
+
+      - name: Check migrations
+        run: docker compose exec -T backendd python manage.py makemigrations --check
+
+
+      - name: Run migrations
+        run: docker compose exec -T backendd python manage.py migrate
+
+
+      - name: Run tests
+        run: docker compose exec -T backendd python manage.py test
+
+
+      - name: Show logs if failed
+        if: failure()
+        run: docker compose logs
+
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v

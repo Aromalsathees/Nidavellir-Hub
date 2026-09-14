@@ -1,0 +1,33 @@
+services:
+
+  db:
+    image: postgres:16-alpine
+
+    env_file:
+      - ./backend/.env.production
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  backendd:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+
+    env_file:
+      - ./backend/.env.docker
+
+    volumes:
+      - ./backend/media:/app/backend/media
+      - ./backend/static:/app/backend/static
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      - db
+
+
+volumes:
+  postgres_data:
