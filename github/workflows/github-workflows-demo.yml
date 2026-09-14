@@ -18,146 +18,83 @@ jobs:
 
     steps:
 
+      # 1. Checkout project
       - name: Checkout code
         uses: actions/checkout@v4
 
 
+      # 2. Create PostgreSQL environment
       - name: Create PostgreSQL environment
         run: |
           cat <<EOF > backend/.env.production
-          POSTGRES_DB=advanced_ecom
+          POSTGRES_DB=advancecom_deploy_db
           POSTGRES_USER=postgres
-          POSTGRES_PASSWORD=postgres
+          POSTGRES_PASSWORD=aromal
           EOF
 
 
+      # 3. Create Django environment
       - name: Create Django environment
         run: |
           cat <<EOF > backend/.env.docker
           DEBUG=True
-          SECRET_KEY=django-insecure-ci-key
-          POSTGRES_DB=advanced_ecom
+          SECRET_KEY=ci-test-secret-key
+          POSTGRES_DB=advancecom_deploy_db
           POSTGRES_USER=postgres
-          POSTGRES_PASSWORD=postgres
+          POSTGRES_PASSWORD=aromal
           POSTGRES_HOST=db
           POSTGRES_PORT=5432
           EOF
 
 
+      # 4. Build Docker images
       - name: Build Docker containers
         run: docker compose build
 
 
+      # 5. Start containers
       - name: Start containers
         run: docker compose up -d
 
 
+      # 6. Check container status
       - name: Check containers
         run: docker compose ps
 
 
+      # 7. Django system check
       - name: Django Check
-        run: docker compose exec -T backendd python manage.py check
+        run: |
+          docker compose exec -T backendd python manage.py check
 
 
+      # 8. Check migrations
       - name: Check migrations
-        run: docker compose exec -T backendd python manage.py makemigrations --check
+        run: |
+          docker compose exec -T backendd python manage.py makemigrations --check
 
 
+      # 9. Run migrations
       - name: Run migrations
-        run: docker compose exec -T backendd python manage.py migrate
+        run: |
+          docker compose exec -T backendd python manage.py migrate
 
 
+      # 10. Run tests
       - name: Run tests
-        run: docker compose exec -T backendd python manage.py test
+        run: |
+          docker compose exec -T backendd python manage.py test
 
 
+      # 11. Show logs if something fails
       - name: Show logs if failed
         if: failure()
-        run: docker compose logs
+        run: |
+          docker compose logs
 
 
+      # 12. Stop containers
       - name: Stop containers
         if: always()
-        run: docker compose down -vname: Django Docker CI
-
-on:
-  push:
-    branches:
-      - main
-
-  pull_request:
-    branches:
-      - main
-
-
-jobs:
-
-  test:
-
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-
-      - name: Create PostgreSQL environment
         run: |
-          cat <<EOF > backend/.env.production
-          POSTGRES_DB=advanced_ecom
-          POSTGRES_USER=postgres
-          POSTGRES_PASSWORD=postgres
-          EOF
-
-
-      - name: Create Django environment
-        run: |
-          cat <<EOF > backend/.env.docker
-          DEBUG=True
-          SECRET_KEY=django-insecure-ci-key
-          POSTGRES_DB=advanced_ecom
-          POSTGRES_USER=postgres
-          POSTGRES_PASSWORD=postgres
-          POSTGRES_HOST=db
-          POSTGRES_PORT=5432
-          EOF
-
-
-      - name: Build Docker containers
-        run: docker compose build
-
-
-      - name: Start containers
-        run: docker compose up -d
-
-
-      - name: Check containers
-        run: docker compose ps
-
-
-      - name: Django Check
-        run: docker compose exec -T backendd python manage.py check
-
-
-      - name: Check migrations
-        run: docker compose exec -T backendd python manage.py makemigrations --check
-
-
-      - name: Run migrations
-        run: docker compose exec -T backendd python manage.py migrate
-
-
-      - name: Run tests
-        run: docker compose exec -T backendd python manage.py test
-
-
-      - name: Show logs if failed
-        if: failure()
-        run: docker compose logs
-
-
-      - name: Stop containers
-        if: always()
-        run: docker compose down -v
+          docker compose down -v
